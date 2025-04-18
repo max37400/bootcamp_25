@@ -25,10 +25,11 @@ prompts = load_prompts("persona_system_prompt.yaml")
 
 # Вебсокет-эндпоинт для интервью
 @router.websocket("/ws/interview")
-async def websocket_interview(ws: WebSocket, persona: str = Query("Junior Python Developer"), skill: str = Query("Python programming")):
+async def websocket_interview(ws: WebSocket, persona: str = Query("Friendly Neighbour"),position: str = Query("Junior Python Developer"), 
+skill: str = Query("Python programming"),communication: str = Query('3'), scr: str = Query('3'), liar: str = Query('3'), dipl: str = Query('3')):
     await ws.accept()  # Принимаем подключение
     # системный промпт для агента на основе выбранной персоны и навыка
-    system_prompt = prompts["persona_system_prompt"].format(persona=persona, skill=skill)
+    system_prompt = prompts["persona_system_prompt"].format(persona=persona, position=position, skill=skill,communication=communication,scr=scr,liar=liar,dipl=dipl)
     agent = create_interviewee_agent(system_prompt)  # агент для интервью
     try:
         while True:

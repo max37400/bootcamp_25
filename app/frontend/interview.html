@@ -16,6 +16,10 @@
                     <p id="personaDisplay" class="mt-1 text-sm">{{ persona if persona else "Not specified" }}</p>
                 </div>
                 <div class="flex-1">
+                    <p class="font-medium text-gray-700 text-sm">Позиция кандидата:</p>
+                    <p id="positionDisplay" class="mt-1 text-sm">{{ position if position else "Not specified" }}</p>
+                </div>
+                <div class="flex-1">
                     <p class="font-medium text-gray-700 text-sm">Оцениваемый навык:</p>
                     <p id="skillDisplay" class="mt-1 text-sm">{{ skill if skill else "Not specified" }}</p>
                 </div>
@@ -49,15 +53,17 @@
     // --- Получение и валидация параметров интервью из URL ---
     const urlParams = new URLSearchParams(window.location.search);
     const currentPersona = urlParams.get('persona');
+    const currentPosition = urlParams.get('position');
     const currentSkill = urlParams.get('skill');
 
     // Если параметры отсутствуют, возвращаем пользователя на выбор профиля
-    if (!currentPersona || !currentSkill) {
+    if (!currentPersona || !currentPosition || !currentSkill) {
         window.location.href = '/select-persona';
     }
 
     // --- Отображение выбранных параметров на странице ---
     document.getElementById('personaDisplay').textContent = currentPersona;
+    document.getElementById('positionDisplay').textContent = currentPosition;
     document.getElementById('skillDisplay').textContent = currentSkill;
 
     // --- Глобальные переменные для работы с аудио, состоянием соединения и историей сообщений ---
@@ -72,6 +78,7 @@
     const conversationHistory = {
         timestamp: new Date().toISOString(),
         persona: currentPersona,
+        position: currentPosition,
         skill: currentSkill,
         messages: []
     };
@@ -81,7 +88,7 @@
         let wsHost = window.location.host;
         if (!wsHost || wsHost === 'false') wsHost = 'localhost:8000';
         const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
-        const wsUrl = `${wsProtocol}://${wsHost}/ws/interview?persona=${encodeURIComponent(currentPersona)}&skill=${encodeURIComponent(currentSkill)}`;
+        const wsUrl = `${wsProtocol}://${wsHost}/ws/interview?persona=${encodeURIComponent(currentPersona)}&position=${encodeURIComponent(currentPosition)}&skill=${encodeURIComponent(currentSkill)}`;
         ws = new WebSocket(wsUrl);
         updateConnectionStatus('Подключение...', 'yellow');
         ws.onopen = () => {
@@ -246,6 +253,7 @@
         const interviewData = {
             timestamp: new Date().toISOString(),
             persona: currentPersona,
+            position: currentPosition,
             skill: currentSkill,
             messages: conversationHistory.messages,
         };

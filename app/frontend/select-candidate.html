@@ -5,18 +5,90 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Профиль Кандидата</title>
 	<script src="https://cdn.tailwindcss.com"></script>
+	<style>.slider-wrapper {
+		position: relative;
+		margin-bottom: 5px;
+	  }
+	  .legend {
+		display: none;
+		position: absolute;
+		top: 70%;
+		left: 0;
+		background: #f0f0f0;
+		border: 1px solid #ccc;
+		padding: 5px 10px;
+		font-size: 0.85em;
+		color: #333;
+		white-space: nowrap;
+		z-index: 1;
+		border-radius: 5px;
+		box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+	  }
+	  .slider-wrapper:hover .legend {
+		display: block;
+	  }
+	  .manual-settings {
+      display: none;
+      margin-top: 10px;
+      padding-left: 10px;
+      border-left: 3px solid #ccc;
+    }
+
+    .manual-settings.visible {
+      display: block;
+    }
+	</style>
 </head>
 <body class="flex flex-col justify-center items-center bg-[#2B2D33] min-h-screen font-sans">
 	<div class="bg-white shadow p-6 rounded w-full max-w-md">
 		<h1 class="mb-4 font-bold text-2xl text-center">Опишите профиль кандидата</h1>
 		<form id="persona-form" class="space-y-4">
 			<div>
-				<label for="persona-profile" class="block mb-1">Профиль:</label>
-				<input type="text" id="persona-profile" name="persona-profile" required class="p-2 border rounded w-full">
+				<label for="persona-position" class="block mb-1">Позиция для найма:</label>
+				<input type="text" id="persona-position" name="persona-position" required class="p-2 border rounded w-full" placeholder="Senior Auditor">
 			</div>
 			<div>
-				<label for="persona-skill" class="block mb-1">Навык, который требуется оценить:</label>
-				<input type="text" id="persona-skill" name="persona-skill" required class="p-2 border rounded w-full">
+				<label for="persona-profile" class="block mb-1">Качества кандидата:</label>
+				<input type="text" id="persona-profile" name="persona-profile" required class="p-2 border rounded w-full" placeholder="Болтливый, токсичный и т.п.">
+				<div class="form-group">
+					<label>
+					  <input type="checkbox" id="manualToggle" onclick="toggleManualSettings()">
+					  Ручная настройка
+					</label>
+				  </div>
+				  <div class="manual-settings" id="manualSettings">
+
+					<div class="form-group">
+				<!--<input type="range" min="1" max="5" value="3" placeholder="Хитрость">-->
+					<div class="slider-wrapper">
+						<label for="communication">Манера общения:</label>
+						1<input type="range" id="communication" name="communication" min="1" max="5" step="1" value="3" oninput="commValue.textContent = this.value">5
+						<div class="legend">1 - Говорит открыто и прямо, без скрытых намеков,<br> 5 - Использует обходящие фразы и двусмысленности, чтобы не раскрывать свои реальные намерения</div>
+						<div>Выбрано: <span id="commValue">3</span></div>
+					</div>
+					<div class="slider-wrapper">
+						<label for="scr">Скрытность:</label>
+						1<input type="range" id="scr" name="scr" min="1" max="5" step="1" value="3" oninput="scrValue.textContent = this.value">5
+						<div class="legend">1 - Открыто делится личной информацией,<br> 5 - Не раскрывает подробности о своей жизни или планах</div>
+						<div>Выбрано: <span id="scrValue">3</span></div>
+					</div>
+					<div class="slider-wrapper">
+						<label for="liar">Умение врать:</label>
+						1<input type="range" id="liar" name="liar" min="1" max="5" step="1" value="3" oninput="liarValue.textContent = this.value">5
+						<div class="legend">1 - Честен и открыт, говорит только правду,<br> 5 - Умеет врать без запинки, может создать правдоподобные истории</div>
+						<div>Выбрано: <span id="liarValue">3</span></div>
+					</div>
+					<div class="slider-wrapper">
+						<label for="dipl">Дипломатичность:</label>
+						1<input type="range" id="dipl" name="dipl" min="1" max="5" step="1" value="3" oninput="diplValue.textContent = this.value">5
+						<div class="legend">1 - Чрезмерно прямолинеен, может задевать чувства других,<br> 5 - Умеет сглаживать конфликтные ситуации, выбирая правильные слова</div>
+						<div>Выбрано: <span id="diplValue">3</span></div>
+					</div>
+			</div>
+		</div>
+			<div>
+				<label for="persona-skill" class="block mb-1">Компетенции, которые требуется оценить:</label>
+				<input type="text" id="persona-skill" name="persona-skill" required class="p-2 border rounded w-full" placeholder="Самостоятельность">
 			</div>
 			<button type="submit" class="bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded w-full text-white">
 				Перейти к интервью
@@ -28,16 +100,30 @@
         document.getElementById('persona-form').addEventListener('submit', function(event) {
             event.preventDefault();
             const persona_profile = document.getElementById('persona-profile').value.trim();
+			const persona_position = document.getElementById('persona-position').value.trim();
             const persona_skill = document.getElementById('persona-skill').value.trim();
+			const manualToggle = document.getElementById('manualToggle').checked;
 
             // Простая валидация на стороне клиента
-            if (!persona_profile || !persona_skill) {
-                alert('Пожалуйста, заполните оба поля: профиль и навык.');
+            if (!persona_profile || !persona_position || !persona_skill) {
+                alert('Пожалуйста, заполните все поля: профиль, позицию и навык.');
                 return;
             }
+
+			// Получаем значения слайдеров или задаем значение по умолчанию (3)
+			const communication = manualToggle ? document.getElementById('communication').value : '3';
+    		const scr = manualToggle ? document.getElementById('scr').value : '3';
+			const liar = manualToggle ? document.getElementById('liar').value : '3';
+    		const dipl = manualToggle ? document.getElementById('dipl').value : '3';
+
             // Прямое перенаправление на страницу интервью с параметрами
-            window.location.href = `/interview?persona=${encodeURIComponent(persona_profile)}&skill=${encodeURIComponent(persona_skill)}`;
+            window.location.href = `/interview?persona=${encodeURIComponent(persona_profile)}&position=${encodeURIComponent(persona_position)}&skill=${encodeURIComponent(persona_skill)}&communication=${communication}&scr=${scr}&liar=${liar}&dipl=${dipl}`;
         });
+		function toggleManualSettings() {
+      const checkbox = document.getElementById('manualToggle');
+      const settingsBlock = document.getElementById('manualSettings');
+      settingsBlock.classList.toggle('visible', checkbox.checked);
+	}
     </script>
 </body>
 </html>

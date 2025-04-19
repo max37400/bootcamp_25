@@ -21,6 +21,7 @@ async def evaluate_endpoint(request: Request):
     last_evaluation_result = {}
     data = await request.json()
     messages = data.get("messages", [])
+    messages = [{k: v for k, v in m.items() if k in ['role', 'content']} for m in messages]
     skills = data['skill'].split(',')
     
     for sk in skills:

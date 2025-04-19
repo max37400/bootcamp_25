@@ -10,6 +10,7 @@ from app.agents.prompts.utils import load_prompts
 from pprint import pp
 from agents import Runner
 from app.agents.interviewee_agent import create_interviewee_agent
+from app.agents.hr_validation_agent import create_hr_validation_agent
 
 # Используем директорию /tmp для временных файлов (доступна для записи всем пользователям)
 TEMP_DIR = "/tmp/ai-interview-temp"
@@ -22,6 +23,8 @@ stt = STT()
 tts = TTS()
 
 prompts = load_prompts("persona_system_prompt.yaml")
+hr_val_prompt = load_prompts("hr_validator_system_prompt.yaml")
+
 
 # Вебсокет-эндпоинт для интервью
 @router.websocket("/ws/interview")
@@ -31,10 +34,25 @@ skill: str = Query("Python programming"),communication: str = Query('3'), scr: s
     # системный промпт для агента на основе выбранной персоны и навыка
     system_prompt = prompts["persona_system_prompt"].format(persona=persona, position=position, skill=skill,communication=communication,scr=scr,liar=liar,dipl=dipl)
     agent = create_interviewee_agent(system_prompt)  # агент для интервью
+    hr_val_agent = create_hr_validation_agent(hr_val_prompt["validation_system_prompt"])
+    prev_messages = []
     try:
         while True:
             data = await ws.receive_text()  # сообщение от клиента
             json_data = json.loads(data)
+
+            if json_data.get("type") == "redo":
+                # убираем последний ход (assistant + user)
+                if len(prev_messages) >= 2:
+                    prev_messages = prev_messages[:-2]
+                else:
+                    prev_messages = []
+                # уведомляем клиента, что контекст обновлён
+                await ws.send_json(
+                    {"type": "service", "content": "Последнее сообщение удалено. Можете отправить новое."})
+                await ws.send_json({"type": "redo_ack"})
+                continue
+
             if json_data["type"] == "text":  # текст
                 user_input = json_data.get("message", "")
                 is_audio = False
@@ -48,18 +66,36 @@ skill: str = Query("Python programming"),communication: str = Query('3'), scr: s
             # Формируем историю сообщений для передачи агенту
             messages = [ttt.create_chat_message(msg["role"], msg["content"]) for msg in json_data.get("history", [])]
             messages.append(ttt.create_chat_message("user", user_input))  # Добавляем текущее сообщение пользователя
+            # валидация вопроса рекрутера по STAR
+            val_resp = await Runner.run(hr_val_agent, user_input,
+                                        context={"messages": messages})  # Вариант с контекстом
+            try:
+                val_json = json.loads(val_resp.final_output)
+                correct = bool(val_json.get("correct"))
+                recommended = val_json.get("recommended_question", "")
+                explanation = val_json.get("explanation", "")
+            except:
+                correct = True
+                recommended = ""
             # Получаем ответ от агента
-            response = await Runner.run(agent, messages)
-            # response = await Runner.run(agent, user_input, context={"messages": messages}) # Вариант с контекстом
+            # response = await Runner.run(agent, messages)
+            messages = prev_messages + messages
+            response = await Runner.run(agent, user_input, context={"messages": messages})  # Вариант с контекстом
             agent_text = response.final_output  # Текстовый ответ агента
+            prev_messages = messages + [ttt.create_chat_message("assistant", agent_text)]
             if is_audio:
                 # Генерируем аудиофайл с ответом агента
                 tts_response = tts.generate_speech(agent_text, tone=prompts["persona_voice_tone_prompt"])
                 agent_audio = base64.b64encode(tts_response.content).decode('utf-8')
                 # Отправляем клиенту текст и аудио
-                await ws.send_json({"type": "voice", "content": agent_text, "user_text": user_input, "audio": agent_audio})
+                await ws.send_json(
+                    {"type": "voice", "content": agent_text, "user_text": user_input, "audio": agent_audio})
             elif not is_audio:
                 # Отправляем клиенту только текст
                 await ws.send_json({"type": "text", "content": agent_text})
+
+            if not correct:
+                await ws.send_json({"type": "service", "content": f"Пример более корректного вопроса: {recommended}"})
+                await ws.send_json({"type": "service", "content": f"Объяснение: {explanation}"})
     except WebSocketDisconnect:
         pass

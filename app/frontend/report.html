@@ -9,6 +9,8 @@
 <body class="flex justify-center items-center bg-[#2B2D33] min-h-screen font-sans">
     <div class="bg-white shadow p-6 rounded w-full max-w-md">
         <h1 class="mb-4 font-bold text-2xl text-center">STAR Evaluation Report</h1>
+        <br>
+        <h3 id="ch_name" class="mb-4 font-bold text-2xl text-center">Название навыка</h3>
         
         <div id="loading-indicator" class="py-4 text-center">
             <div class="inline-block border-t-2 border-b-2 border-blue-500 rounded-full w-8 h-8 animate-spin"></div>
@@ -17,39 +19,156 @@
         
         <div id="error-message" class="hidden py-4 text-red-600 text-center"></div>
         
-        <div id="report-content" class="hidden space-y-4">
+        <div id="report-content1" class="hidden space-y-4">
             <div>
                 <h2 class="font-bold text-blue-700">Ситуация (Situation)</h2>
-                <div id="situation" class="bg-gray-50 p-3 border rounded text-gray-800 whitespace-pre-wrap">-</div>
+                <div id="situation1" class="bg-gray-50 p-3 border rounded text-gray-800 whitespace-pre-wrap">-</div>
             </div>
             
             <div>
                 <h2 class="font-bold text-green-700">Задача (Task)</h2>
-                <div id="task" class="bg-gray-50 p-3 border rounded text-gray-800 whitespace-pre-wrap">-</div>
+                <div id="task1" class="bg-gray-50 p-3 border rounded text-gray-800 whitespace-pre-wrap">-</div>
             </div>
             
             <div>
                 <h2 class="font-bold text-purple-700">Действия (Action)</h2>
-                <div id="action" class="bg-gray-50 p-3 border rounded text-gray-800 whitespace-pre-wrap">-</div>
+                <div id="action1" class="bg-gray-50 p-3 border rounded text-gray-800 whitespace-pre-wrap">-</div>
             </div>
             
             <div>
                 <h2 class="font-bold text-red-700">Результат (Result)</h2>
-                <div id="result" class="bg-gray-50 p-3 border rounded text-gray-800 whitespace-pre-wrap">-</div>
+                <div id="result1" class="bg-gray-50 p-3 border rounded text-gray-800 whitespace-pre-wrap">-</div>
+            </div>
+        </div>
+
+        <div id="report-content2" class="hidden space-y-4">
+            <div>
+                <h2 class="font-bold text-blue-700">Ситуация (Situation)</h2>
+                <div id="situation2" class="bg-gray-50 p-3 border rounded text-gray-800 whitespace-pre-wrap">-</div>
+            </div>
+            
+            <div>
+                <h2 class="font-bold text-green-700">Задача (Task)</h2>
+                <div id="task2" class="bg-gray-50 p-3 border rounded text-gray-800 whitespace-pre-wrap">-</div>
+            </div>
+            
+            <div>
+                <h2 class="font-bold text-purple-700">Действия (Action)</h2>
+                <div id="action2" class="bg-gray-50 p-3 border rounded text-gray-800 whitespace-pre-wrap">-</div>
+            </div>
+            
+            <div>
+                <h2 class="font-bold text-red-700">Результат (Result)</h2>
+                <div id="result2" class="bg-gray-50 p-3 border rounded text-gray-800 whitespace-pre-wrap">-</div>
+            </div>
+        </div>
+
+        <div id="report-content3" class="hidden space-y-4">
+            <div>
+                <h2 class="font-bold text-blue-700">Ситуация (Situation)</h2>
+                <div id="situation3" class="bg-gray-50 p-3 border rounded text-gray-800 whitespace-pre-wrap">-</div>
+            </div>
+            
+            <div>
+                <h2 class="font-bold text-green-700">Задача (Task)</h2>
+                <div id="task3" class="bg-gray-50 p-3 border rounded text-gray-800 whitespace-pre-wrap">-</div>
+            </div>
+            
+            <div>
+                <h2 class="font-bold text-purple-700">Действия (Action)</h2>
+                <div id="action3" class="bg-gray-50 p-3 border rounded text-gray-800 whitespace-pre-wrap">-</div>
+            </div>
+            
+            <div>
+                <h2 class="font-bold text-red-700">Результат (Result)</h2>
+                <div id="result3" class="bg-gray-50 p-3 border rounded text-gray-800 whitespace-pre-wrap">-</div>
             </div>
         </div>
         
         <div class="mt-6 text-center">
             <a href="/evaluation" class="inline-block bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-white">Назад к оценке</a>
             <a href="/" class="inline-block bg-gray-500 hover:bg-gray-600 ml-2 px-4 py-2 rounded text-white">На главную</a>
+            <button  class="inline-block bg-blue-500 hover:bg-blue-600 px-4 py-2 rounded text-white" onclick="toggleVisibility()">Следующий навык</button>
         </div>
     </div>
 
     <script>
+        let mask = [1, 0, 0];
+        let count_ch = 1;
+        let keys_glob = []
+
+        function toggleVisibility() {
+            const content = document.getElementById('toggleContent');
+
+            const reportContent1 = document.getElementById('report-content1');
+            const reportContent2 = document.getElementById('report-content2');
+            const reportContent3 = document.getElementById('report-content3');
+            const reportName = document.getElementById('ch_name');
+
+            
+
+            
+            if (count_ch != 1) {
+                if (count_ch == 2){
+                    if (mask[0] == 1) {
+                        mask[1] = 1
+                        mask[0] = 0
+                        reportContent1.classList.add('hidden');
+                        reportContent2.classList.remove('hidden');
+                        reportName.textContent = keys_glob[1]
+                    }
+                    else {
+                        mask[0] = 1
+                        mask[1] = 0
+                        reportContent1.classList.remove('hidden');
+                        reportContent2.classList.add('hidden');     
+                        reportName.textContent = keys_glob[0]                   
+                    }
+                }
+                else {
+
+                    if (mask[0] == 1) {
+                        mask[1] = 1
+                        mask[0] = 0
+                        reportContent1.classList.add('hidden');
+                        reportContent2.classList.remove('hidden');
+                        reportName.textContent = keys_glob[1]
+                    }
+                    else if (mask[1] == 1) {
+                        mask[2] = 1
+                        mask[1] = 0
+                        reportContent2.classList.add('hidden');
+                        reportContent3.classList.remove('hidden');
+                        reportName.textContent = keys_glob[2]
+                    } 
+                    else {
+                        mask[0] = 1
+                        mask[2] = 0
+                        reportContent3.classList.add('hidden');
+                        reportContent1.classList.remove('hidden');                        
+                        reportName.textContent = keys_glob[0]
+                    }
+
+                }
+                
+                
+            }
+            
+
+
+
+        
+        }
+    
+        
         document.addEventListener('DOMContentLoaded', function() {
             const loadingIndicator = document.getElementById('loading-indicator');
             const errorMessage = document.getElementById('error-message');
-            const reportContent = document.getElementById('report-content');
+            const reportContent1 = document.getElementById('report-content1');
+            const reportContent2 = document.getElementById('report-content2');
+            const reportContent3 = document.getElementById('report-content3');
+            const reportName = document.getElementById('ch_name');
+
             
             // Максимальное время ожидания
             const timeoutDuration = 20000; // 20 секунд
@@ -78,14 +197,45 @@
                     }
                     
                     // Заполняем содержимое элементов
-                    document.getElementById('situation').textContent = data.Situation || "-";
-                    document.getElementById('task').textContent = data.Task || "-";
-                    document.getElementById('action').textContent = data.Action || "-";
-                    document.getElementById('result').textContent = data.Result || "-";
+                    // простите, пожалуйста
+                    var keys = Object.keys(data) 
+                    keys_glob = keys
+
+                    reportName.textContent = keys[0]
+
+                    document.getElementById('situation1').textContent = data[keys[0]].Situation || "-";
+                    document.getElementById('task1').textContent = data[keys[0]].Task || "-";
+                    document.getElementById('action1').textContent = data[keys[0]].Action || "-";
+                    document.getElementById('result1').textContent = data[keys[0]].Result || "-";
+
+                    if (keys.length > 1) {
+                        // visible кнопки
+                        // название компетенции сверху
+                        reportContent2.classList.add('hidden');
+                        count_ch = 2;
+
+                        document.getElementById('situation2').textContent = data[keys[1]].Situation || "-";
+                        document.getElementById('task2').textContent = data[keys[1]].Task || "-";
+                        document.getElementById('action2').textContent = data[keys[1]].Action || "-";
+                        document.getElementById('result2').textContent = data[keys[1]].Result || "-";
+
+                        if (keys.length > 2) {
+                            reportContent2.classList.add('hidden');
+                            count_ch = 3;
+                                                
+                            document.getElementById('situation3').textContent = data[keys[2]].Situation || "-";
+                            document.getElementById('task3').textContent = data[keys[2]].Task || "-";
+                            document.getElementById('action3').textContent = data[keys[2]].Action || "-";
+                            document.getElementById('result3').textContent = data[keys[2]].Result || "-";
+
+                        }
+                    }
+                        
+
                     
                     // Скрываем индикатор загрузки и показываем результаты
                     loadingIndicator.classList.add('hidden');
-                    reportContent.classList.remove('hidden');
+                    reportContent1.classList.remove('hidden');
                 })
                 .catch(error => {
                     console.error('Ошибка:', error);

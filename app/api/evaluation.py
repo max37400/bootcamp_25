@@ -17,16 +17,18 @@ last_evaluation_result:dict = {}
 @router.post("/api/evaluation")
 async def evaluate_endpoint(request: Request):
     global last_evaluation_result
-    # 1. Считаем входные данные
+    
+    last_evaluation_result = {}
     data = await request.json()
     messages = data.get("messages", [])
-    # 2. Создадим агента с системным промптом
-    agent = create_evaluation_agent(system_prompt)
-    # 3. Получим ответ от агента
-    response = await Runner.run(agent, messages)
-    # 4. Преобразуем в словарь и запомним
-    last_evaluation_result = response.final_output_as(cls=dict)
-    # 5. Вернём клиенту результат сразу
+    skills = data['skill'].split(',')
+    
+    for sk in skills:
+        system_prompt = prompts["evaluation_system_prompt"].format(skill=sk)
+        agent = create_evaluation_agent(system_prompt)  
+        response = await Runner.run(agent, messages)
+        last_evaluation_result[sk] = response.final_output_as(cls=dict)
+    print(last_evaluation_result)
     return last_evaluation_result
 
 @router.get("/api/evaluation")

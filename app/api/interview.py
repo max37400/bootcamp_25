@@ -49,7 +49,7 @@ skill: str = Query("Python programming"),communication: str = Query('3'), scr: s
                     prev_messages = []
                 # уведомляем клиента, что контекст обновлён
                 await ws.send_json(
-                    {"type": "service", "content": "Последнее сообщение удалено. Можете отправить новое."})
+                    {"type": "system", "content": "Последнее сообщение удалено. Можете отправить новое."})
                 await ws.send_json({"type": "redo_ack"})
                 continue
 
@@ -95,7 +95,7 @@ skill: str = Query("Python programming"),communication: str = Query('3'), scr: s
                 await ws.send_json({"type": "text", "content": agent_text})
 
             if not correct:
-                await ws.send_json({"type": "service", "content": f"Пример более корректного вопроса: {recommended}"})
-                await ws.send_json({"type": "service", "content": f"Объяснение: {explanation}"})
+                await ws.send_json({"type": "system", "content": f"Пример более корректного вопроса: {recommended}"})
+                await ws.send_json({"type": "system", "content": f"Объяснение: {explanation}"})
     except WebSocketDisconnect:
         pass
